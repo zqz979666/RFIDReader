@@ -47,11 +47,15 @@ public class ReadTags {
         tagMap = new HashMap<String, Integer>();
 
         try {
-            File dir = new File(dateOfToday+"Data");
+            File dir0 = new File("Data");
+            if(!dir0.exists()){
+                dir0.mkdirs();
+            }
+            File dir = new File("Data/" + dateOfToday + "Data");
             if(!dir.exists()){
                 dir.mkdirs();
             }
-            File dataFile = new File(dateOfToday+"Data/"+ timeNow + "-" +dataPath);
+            File dataFile = new File("Data/" + dateOfToday + "Data/" + timeNow + "-" +dataPath);
             if(!dataFile.exists()){
                 if(dataFile.createNewFile()){
                     System.out.println("Create Data File...");

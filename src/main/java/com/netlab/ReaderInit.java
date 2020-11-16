@@ -60,14 +60,14 @@ public class ReaderInit {
                 //设置report格式
                 ReportConfig tr = settings.getReport();
                 //默认setting下individual Report只包含Epc
-//                tr.setIncludeAntennaPortNumber(true);
-//                tr.setIncludeChannel(true);
-//                tr.setIncludeFirstSeenTime(true);
-//                tr.setIncludeLastSeenTime(true);
+                tr.setIncludeAntennaPortNumber(true);
+                tr.setIncludeChannel(true);
+                tr.setIncludeFirstSeenTime(true);
+                tr.setIncludeLastSeenTime(true);
 //                tr.setIncludePeakRssi(true);
 //                tr.setIncludeSeenCount(true);
 //                tr.setIncludeFastId(true);
-//                tr.setIncludePhaseAngle(true);
+                tr.setIncludePhaseAngle(true);
 //                tr.setIncludeDopplerFrequency(true);
 //                tr.setIncludePcBits(true);
                 tr.setMode(ReportMode.Individual);//单个报告
@@ -81,9 +81,14 @@ public class ReaderInit {
 
                 AntennaConfig ac1 = acg.getAntenna(1);//获取第一个端口的天线Config
                 ac1.setEnabled(true);//仅将第一个端口天线置为可用
-                ac1.setPortName("Test Antenna");
+                ac1.setPortName("Antenna01");
                 ac1.setIsMaxRxSensitivity(true);
                 //ac1.setIsMaxTxPower(true);
+
+                AntennaConfig ac2 = acg.getAntenna(2);//第二个端口的天线config
+                ac2.setEnabled(true);
+                ac2.setPortName("Antenna02");
+                ac2.setIsMaxRxSensitivity(true);
 
                 //保存设置
                 try {

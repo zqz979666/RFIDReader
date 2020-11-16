@@ -91,7 +91,7 @@ public class TagReportListenerImplementation implements TagReportListener {
                 }
             }
 
-            interval = t.getFirstSeenTime().getLocalDateTime().getTime() - initTime;
+            interval = t.getLastSeenTime().getLocalDateTime().getTime() - initTime;
             //生成记录
             // Epc Interval RSSI peakRSSI Phase TagSeenCount RfDopplerFrequency
             record = t.getEpc().toHexString() + "  "
