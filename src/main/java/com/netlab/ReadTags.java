@@ -31,6 +31,15 @@ public class ReadTags {
 
     public static HashMap<String, Integer> tagMap;
 
+    public static ArrayList<Double> antenna1Phase;//天线1的相位数组
+    public static ArrayList<Double> antenna2Phase;//天线2的相位数组
+
+    public static ArrayList<Double> antenna1Time;//天线1的时间数组
+    public static ArrayList<Double> antenna2Time;//天线2的时间数组
+
+    public static ArrayList<Pos> antenna1Pos;//天线1的位置数组
+    public static ArrayList<Pos> antenna2Pos;//天线2的位置数组
+
     public ReadTags() {
         //在构造函数中初始化field
         //获取今日日期并储存到字符串中
@@ -39,12 +48,20 @@ public class ReadTags {
         System.out.println("Start processing...");
 
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMdd");
-        DateTimeFormatter dfTime = DateTimeFormatter.ofPattern("HHmmSS");
+        DateTimeFormatter dfTime = DateTimeFormatter.ofPattern("HHmmss");
         dateOfToday = df.format(ldt);
         timeNow = dfTime.format(ldt);
 
         tagData = new ArrayList<String>();
         tagMap = new HashMap<String, Integer>();
+
+        antenna1Phase = new ArrayList<Double>();
+        antenna2Phase = new ArrayList<Double>();
+        antenna1Time = new ArrayList<Double>();
+        antenna2Time = new ArrayList<Double>();
+        antenna1Pos = new ArrayList<Pos>();
+        antenna2Pos = new ArrayList<Pos>();
+
 
         try {
             File dir0 = new File("Data");
@@ -93,92 +110,21 @@ public class ReadTags {
             System.out.println("set TagReportListener successfully!");
 
             writer.write("Read Time : " + dateOfToday + "\n");
-            writer.write("Epc  t   Channel  PeakRSSI PA    SC DopplerFreq" + "\n");
+
+            reader.start();
+            System.out.println("Start inventory...");
+            Thread.sleep(18000);
+
+
+            writer.write(antenna1Phase.toString());
+            writer.write("\n");
+            writer.write(antenna2Phase.toString());
             writer.flush();
-
-            //创建一个新的Op序列
-            TagOpSequence seq = new TagOpSequence();
-            seq.setOps(new ArrayList<TagOp>());//Op序列
-            seq.setExecutionCount((short)2);//执行两次
-            seq.setSequenceStopTrigger(SequenceTriggerType.ExecutionCount);
-            seq.setState(SequenceState.Active);//启用
-            seq.setId(1);//Op序列的Id
-
-            //创建一个新的读操作
-            TagReadOp readOp = new TagReadOp();
-            readOp.setMemoryBank(MemoryBank.User);
-            readOp.setWordCount((short)2);//读取两个word
-            readOp.setWordPointer((short)0);//从0开始读取
-            seq.getOps().add(readOp);
-
-            //创建一个新的写操作
-            TagWriteOp writeOp = new TagWriteOp();
-            String myName = "0123abcd";
-            writeOp.setMemoryBank(MemoryBank.User);
-            writeOp.setWordPointer((short) 0);
-            writeOp.setData(TagData.fromByteArray(myName.getBytes()));
-            seq.getOps().add(writeOp);
-
-            //设置seq的目标Tag，若未设置则对所有Tag生效
-            seq.setTargetTag(new TargetTag());//指定要读取的标签，这里还是指定为21160220
-            seq.getTargetTag().setBitPointer(BitPointers.Epc);
-            seq.getTargetTag().setMemoryBank(MemoryBank.Epc);
-            seq.getTargetTag().setData("21160220");
-
-            //添加操作到序列中
-            reader.addOpSequence(seq);
-            reader.setTagOpCompleteListener(new TagOpCompleteListenerImplementation());
-
-            //获取当前Instance
-            long beginTime = System.currentTimeMillis();
-
-            //查询时间设置为1s，然后每次增加1s
-            long invTime = 1000;
-            //while(System.currentTimeMillis() - beginTime < 10500) {
-            while(invTime <= 10000  ) {
-                //启动Reader，开始读取
-                reader.start();
-                System.out.println("Start inventory...");
-                //给reader 20s来读取tag
-                Thread.sleep(invTime);
-
-                //停止Reader，停止读取
-                reader.stop();
-                System.out.println("Stop inventory...time: " + invTime);
-                writer.write("inventory time: " + invTime + "\n");
-                invTime += 1000;
-
-                //遍历tagData中的数据，按行写入
-                for(String td : tagData) {
-                    writer.write(td);
-                    //统计TagData
-                    if(td.indexOf(" ")!= -1) {
-                        String epc = td.substring(0, td.indexOf(" "));
-                        //若不存在epc，则为第一次探查到
-                        if(!tagMap.containsKey(epc)){
-                            tagMap.put(epc, 1);
-                        } else {
-                            //若存在，则count++
-                            int count = tagMap.get(epc);
-                            count += 1;
-                            tagMap.put(epc, count);
-                        }
-                    }
-                }
-                System.out.println("Tag data batch saved!");
-                //清空tagData，留给下一帧读取的信息使用
-                tagData.clear();
-                writer.flush();
-
-                //遍历tagMap
-                System.out.println("Tags that have been inventoried: ");
-                for (String key : tagMap.keySet()){
-                    Integer value = tagMap.get(key);
-                    System.out.println("Epc: " + key + " inventory count: " + value);
-                }
-
-                //休眠5s后进行下一轮查询
-                Thread.sleep(5000);
+            System.out.println("Data saved!");
+            //展示一下天线1测量的相位值
+            System.out.println("N: " + antenna1Phase.size());
+            for(Double ph : antenna1Phase){
+                System.out.print("Antenna1 measured phase : " + ph);
             }
 
             System.out.println("Read Complete, ready to close connection...");

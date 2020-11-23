@@ -46,7 +46,13 @@ public class ReaderInit {
                 settings.setRfMode(0);//MaxThroughput
                 settings.setSearchMode(SearchMode.DualTarget);
                 settings.setSession(1);//设置会话1
-                settings.setTagPopulationEstimate(20);//预计只有一个标签
+                settings.setTagPopulationEstimate(1);//预计只有一个标签
+
+                //设置10s后自动结束
+                AutoStopConfig asc = settings.getAutoStop();
+                asc.setMode(AutoStopMode.Duration);
+                asc.setDurationInMs(16000);//10s
+                settings.setAutoStop(asc);
 
                 //设置标签过滤
                 TagFilter tf1 = settings.getFilters().getTagFilter1();//获取Filter1
@@ -66,7 +72,7 @@ public class ReaderInit {
                 tr.setIncludeLastSeenTime(true);
 //                tr.setIncludePeakRssi(true);
 //                tr.setIncludeSeenCount(true);
-//                tr.setIncludeFastId(true);
+                tr.setIncludeFastId(true);
                 tr.setIncludePhaseAngle(true);
 //                tr.setIncludeDopplerFrequency(true);
 //                tr.setIncludePcBits(true);

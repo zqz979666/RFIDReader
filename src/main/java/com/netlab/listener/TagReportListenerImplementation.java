@@ -6,6 +6,7 @@
 package com.netlab.listener;
 
 import com.impinj.octane.*;
+import com.netlab.Pos;
 import com.netlab.ReadTags;
 
 import java.text.DecimalFormat;
@@ -90,8 +91,7 @@ public class TagReportListenerImplementation implements TagReportListener {
                     initTime = t.getFirstSeenTime().getLocalDateTime().getTime();
                 }
             }
-
-            interval = t.getLastSeenTime().getLocalDateTime().getTime() - initTime;
+            interval = t.getLastSeenTime().getLocalDateTime().getTime() - initTime;//Δt，单位ms
             //生成记录
             // Epc Interval RSSI peakRSSI Phase TagSeenCount RfDopplerFrequency
             record = t.getEpc().toHexString() + "  "
@@ -106,6 +106,29 @@ public class TagReportListenerImplementation implements TagReportListener {
                 //System.out.println(record);
                 ReadTags.tagData.add(record + '\n');
             }
+
+            //若为天线1的数据
+            //设定N为100，即天线每秒读30次左右，读10s
+            if(t.getAntennaPortNumber()==1 && ReadTags.antenna1Time.size()<300){
+                ReadTags.antenna1Time.add((double)(interval + initTime)/1000);//时间数组，单位s
+                ReadTags.antenna1Phase.add(t.getPhaseAngleInRadians());//相位数组
+                double v = 0.05;//给定速度，单位m/s
+                double y = 0.7;//y轴坐标固定 , (0, 70cm)
+                double x = -1 * v * interval;//两个天线的初始x都为0
+                ReadTags.antenna1Pos.add(new Pos(x, y));//添加位置，元素为坐标
+            }
+
+
+            //若为天线2的数据
+            if(t.getAntennaPortNumber()==2 && ReadTags.antenna2Time.size()<300){
+                ReadTags.antenna2Time.add((double)(interval + initTime)/1000);
+                ReadTags.antenna2Phase.add(t.getPhaseAngleInRadians());//相位数组
+                double v = 0.05;//给定速度，单位m/s
+                double y = -0.8;//y轴坐标固定 , (0, -80cm)
+                double x = -1 * v * interval;
+                ReadTags.antenna2Pos.add(new Pos(x, y));//添加位置，元素为坐标
+            }
+
         }
     }
 }
