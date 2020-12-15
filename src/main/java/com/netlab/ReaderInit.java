@@ -44,30 +44,30 @@ public class ReaderInit {
 
                 //更改默认设置
                 settings.setRfMode(0);//MaxThroughput
-                settings.setSearchMode(SearchMode.DualTarget);
+                settings.setSearchMode(SearchMode.SingleTarget);
                 settings.setSession(1);//设置会话1
-                settings.setTagPopulationEstimate(1);//预计只有一个标签
+                settings.setTagPopulationEstimate(4);//预计标签数
 
                 //设置10s后自动结束
-                AutoStopConfig asc = settings.getAutoStop();
-                asc.setMode(AutoStopMode.Duration);
-                asc.setDurationInMs(16000);//10s
-                settings.setAutoStop(asc);
+//                AutoStopConfig asc = settings.getAutoStop();
+//                asc.setMode(AutoStopMode.Duration);
+//                asc.setDurationInMs(10000);//10s
+//                settings.setAutoStop(asc);
 
                 //设置标签过滤
                 TagFilter tf1 = settings.getFilters().getTagFilter1();//获取Filter1
                 tf1.setBitPointer(BitPointers.Epc);//以Epc来过滤标签
                 tf1.setBitCount(32);//总共比较32bit，这是Epc的位数：32bit/8位16进制
                 tf1.setFilterOp(TagFilterOp.Match);//匹配后才执行
-                tf1.setTagMask("21160220");//Epc掩码 16进制字符串
+                tf1.setTagMask("20201215");//Epc掩码 16进制字符串
                 tf1.setMemoryBank(MemoryBank.Epc);
-                settings.getFilters().setMode(TagFilterMode.None);//仅Filter1生效
+                settings.getFilters().setMode(TagFilterMode.OnlyFilter1);//仅Filter1生效
 
                 //设置report格式
                 ReportConfig tr = settings.getReport();
                 //默认setting下individual Report只包含Epc
-                tr.setIncludeAntennaPortNumber(true);
-                tr.setIncludeChannel(true);
+//                tr.setIncludeAntennaPortNumber(true);
+//                tr.setIncludeChannel(true);
                 tr.setIncludeFirstSeenTime(true);
                 tr.setIncludeLastSeenTime(true);
 //                tr.setIncludePeakRssi(true);
@@ -81,7 +81,7 @@ public class ReaderInit {
                 //设置天线属性
                 AntennaConfigGroup acg = settings.getAntennas();
                 acg.disableAll();//首先禁用所有天线
-                acg.setIsMaxRxSensitivity(false);//设置为非最大灵敏度
+                acg.setIsMaxRxSensitivity(true);//设置为非最大灵敏度
                 acg.setIsMaxTxPower(false);//设置为非最大传输功率
                 acg.setTxPowerinDbm(30);//设置传输功率为30Dbm
 
@@ -91,10 +91,10 @@ public class ReaderInit {
                 ac1.setIsMaxRxSensitivity(true);
                 //ac1.setIsMaxTxPower(true);
 
-                AntennaConfig ac2 = acg.getAntenna(2);//第二个端口的天线config
-                ac2.setEnabled(true);
-                ac2.setPortName("Antenna02");
-                ac2.setIsMaxRxSensitivity(true);
+//                AntennaConfig ac2 = acg.getAntenna(2);//第二个端口的天线config
+//                ac2.setEnabled(true);
+//                ac2.setPortName("Antenna02");
+//                ac2.setIsMaxRxSensitivity(true);
 
                 //保存设置
                 try {

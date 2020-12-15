@@ -16,10 +16,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.Array;
+import java.sql.Time;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Scanner;
 
 public class Tagyro {
 
@@ -29,9 +32,23 @@ public class Tagyro {
     public static String dateOfToday;//获取今日日期
     public static String timeNow;//获取现在的时间
     public static ArrayList<String> tagData;//写入文件的已读取的标签信息
+    final static double waveLength = 30000.0/920.625;
 
-    public static HashMap<String, Integer> tagMap;
-
+    //标签阵列中标签的数量
+    public static final int tagNum = 4;
+    public static int index = 0;
+    //相位哈希表
+    public static HashMap<String, Double> phaseMap;
+    //PDoA数组
+    public static Double[][] PDoA;
+    //PDoA最大值
+    public static Double[][] PDoAMax;
+    //PDoa最小值
+    public static Double[][] PDoAMin;
+    //相位补偿
+    public static Double[][] unwarp;
+    //Index Map
+    public static HashMap<String, Integer> indexMap;
 
     public Tagyro() {
         //在构造函数中初始化field
@@ -46,8 +63,14 @@ public class Tagyro {
         timeNow = dfTime.format(ldt);
 
         tagData = new ArrayList<String>();
-        tagMap = new HashMap<String, Integer>();
+        phaseMap = new HashMap<String, Double>();
+        indexMap = new HashMap<String, Integer>();
+        PDoA = new Double[tagNum][tagNum];
+        PDoAMax = new Double[tagNum][tagNum];
+        PDoAMin = new Double[tagNum][tagNum];
+        unwarp = new Double[tagNum][tagNum];
 
+        initArrays();
 
 
         try {
@@ -70,6 +93,18 @@ public class Tagyro {
             writer = new FileWriter(dataFile);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void initArrays() {
+        //初始化数组们
+        for(int i = 0 ; i < tagNum ; i++){
+            for(int j = 0 ; j < tagNum ; j++){
+                PDoA[i][j] = (double)0;
+                PDoAMax[i][j] = (double)-10;
+                PDoAMin[i][j] = (double)10;
+                unwarp[i][j] = (double)0;
+            }
         }
     }
 
@@ -98,11 +133,40 @@ public class Tagyro {
 
             writer.write("Read Time : " + dateOfToday + "\n");
 
-            reader.start();
-            System.out.println("Start inventory...");
-            //跳频间隔约为300ms
-            Thread.sleep(500);
+            //360°旋转 以2°为步长 总共180组数据
+            for(int i = 0 ; i < 180 ; i++){
+                reader.start();
+                System.out.println("Start inventory...");
+                Thread.sleep(1000);//等待1s 查询
+                reader.stop();
 
+                System.out.println("max PDoA: ");
+                for(int i1 = 0 ; i1 < tagNum ; i1++){
+                    for(int j1 = 0 ; j1 < tagNum ; j1++){
+                        System.out.print(PDoAMax[i1][j1] + " ");
+                    }
+                    System.out.println("");
+                }
+                System.out.println("min PDoA: ");
+                for(int i1 = 0 ; i1 < tagNum ; i1++){
+                    for(int j1 = 0 ; j1 < tagNum ; j1++){
+                        System.out.print(PDoAMin[i1][j1] + " ");
+                    }
+                    System.out.println("");
+                }
+                System.out.println("effective distance: ");
+                for(int i1 = 0 ; i1 < tagNum ; i1++){
+                    for(int j1 = 0 ; j1 < tagNum ; j1++){
+                        double ed = (PDoAMax[i1][j1]-PDoAMin[i1][j1])* waveLength / (8*Math.PI);
+                        System.out.print(PDoAMax[i1][j1] + " ");
+                    }
+                    System.out.println("");
+                }
+
+                System.out.println("Press Enter to continue...");
+                Scanner s = new Scanner(System.in);
+                s.nextLine();
+            }
 
             System.out.println("Read Complete, ready to close connection...");
             reader.disconnect();
@@ -116,4 +180,5 @@ public class Tagyro {
             System.out.println(e.getMessage());
         }
     }
+
 }

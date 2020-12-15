@@ -97,19 +97,55 @@ public class TagReportListenerImplementationOfTagyro implements TagReportListene
             }
             interval = t.getLastSeenTime().getLocalDateTime().getTime() - initTime;//Δt，单位ms
             //生成记录
-            // Id Interval RSSI Phase TagSeenCount RfDopplerFrequency
+            // Id Interval Phase
             record = t.getTid().toHexString() + "  "
                     + interval + " "
-                    + df.format(t.getChannelInMhz()) + " "
-                    + df.format(t.getPhaseAngleInRadians()) + " "
-                    + t.getTagSeenCount() + " "
-                    + df.format(t.getRfDopplerFrequency());
+                    + df.format(t.getPhaseAngleInRadians()) + " ";
             if(!record.equals("")){
                 System.out.println("record to file...");
                 //System.out.println(record);
                 Tagyro.tagData.add(record + '\n');
+                //向全局数组中写入数据
+                String tagId = t.getTid().toHexString();
+                //若表中没有项 则添加 若有 则更新
+                if(!Tagyro.phaseMap.containsKey(tagId)){
+                    synchronized (this) {
+                        Tagyro.indexMap.put(tagId,Tagyro.index++);
+                    }
+                }
+                Tagyro.phaseMap.put(tagId,t.getPhaseAngleInRadians());
+                //获取本tag在二维数组中的index
+                int index = Tagyro.indexMap.get(tagId);
+                //取得上次的PDoA
+                Double[] lastPDoA = Tagyro.PDoA[index];
+                for(int i = 0 ; i < Tagyro.tagNum ; i++){
+                    Tagyro.PDoA[index][i] = t.getPhaseAngleInRadians();
+                }
+                for(String id: Tagyro.phaseMap.keySet()){
+                    int ind = Tagyro.indexMap.get(id);
+                    Tagyro.PDoA[index][ind] = t.getPhaseAngleInRadians() - Tagyro.phaseMap.get(id) + Tagyro.unwarp[index][ind];
+                    Tagyro.PDoA[ind][index] = Tagyro.phaseMap.get(id) - t.getPhaseAngleInRadians();
+                    //unwarp
+                    if(Tagyro.PDoA[index][ind]-lastPDoA[ind]>Math.PI && lastPDoA[ind]!=0){
+                        Tagyro.unwarp[index][ind] += Math.PI;
+                    }
+                    if(Tagyro.PDoA[index][ind]-lastPDoA[ind]<Math.PI*(-1) && lastPDoA[ind]!=0){
+                        Tagyro.unwarp[index][ind] -= Math.PI;
+                    }
+                    //update max and min
+                    if(Tagyro.PDoA[index][ind]>Tagyro.PDoAMax[index][ind]) {
+                        Tagyro.PDoAMax[index][ind] = Tagyro.PDoA[index][ind];
+                        Tagyro.PDoAMin[ind][index] = Tagyro.PDoA[ind][index];
+                    }
+                    if(Tagyro.PDoA[index][ind]<Tagyro.PDoAMin[index][ind]) {
+                        Tagyro.PDoAMin[index][ind] = Tagyro.PDoA[index][ind];
+                        Tagyro.PDoAMax[ind][index] = Tagyro.PDoA[ind][index];
+                    }
+                }
+
             }
 
         }
     }
+
 }
