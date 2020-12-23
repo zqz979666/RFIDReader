@@ -6,7 +6,6 @@
 package com.netlab.listener;
 
 import com.impinj.octane.*;
-import com.netlab.Pos;
 import com.netlab.Tagyro;
 
 import java.text.DecimalFormat;
@@ -116,31 +115,13 @@ public class TagReportListenerImplementationOfTagyro implements TagReportListene
                 Tagyro.phaseMap.put(tagId,t.getPhaseAngleInRadians());
                 //获取本tag在二维数组中的index
                 int index = Tagyro.indexMap.get(tagId);
-                //取得上次的PDoA
-                Double[] lastPDoA = Tagyro.PDoA[index];
                 for(int i = 0 ; i < Tagyro.tagNum ; i++){
                     Tagyro.PDoA[index][i] = t.getPhaseAngleInRadians();
                 }
                 for(String id: Tagyro.phaseMap.keySet()){
                     int ind = Tagyro.indexMap.get(id);
-                    Tagyro.PDoA[index][ind] = t.getPhaseAngleInRadians() - Tagyro.phaseMap.get(id) + Tagyro.unwarp[index][ind];
                     Tagyro.PDoA[ind][index] = Tagyro.phaseMap.get(id) - t.getPhaseAngleInRadians();
-                    //unwarp
-                    if(Tagyro.PDoA[index][ind]-lastPDoA[ind]>Math.PI && lastPDoA[ind]!=0){
-                        Tagyro.unwarp[index][ind] += Math.PI;
-                    }
-                    if(Tagyro.PDoA[index][ind]-lastPDoA[ind]<Math.PI*(-1) && lastPDoA[ind]!=0){
-                        Tagyro.unwarp[index][ind] -= Math.PI;
-                    }
-                    //update max and min
-                    if(Tagyro.PDoA[index][ind]>Tagyro.PDoAMax[index][ind]) {
-                        Tagyro.PDoAMax[index][ind] = Tagyro.PDoA[index][ind];
-                        Tagyro.PDoAMin[ind][index] = Tagyro.PDoA[ind][index];
-                    }
-                    if(Tagyro.PDoA[index][ind]<Tagyro.PDoAMin[index][ind]) {
-                        Tagyro.PDoAMin[index][ind] = Tagyro.PDoA[index][ind];
-                        Tagyro.PDoAMax[ind][index] = Tagyro.PDoA[ind][index];
-                    }
+                    Tagyro.PDoA[index][ind] = t.getPhaseAngleInRadians() - Tagyro.phaseMap.get(id);
                 }
 
             }

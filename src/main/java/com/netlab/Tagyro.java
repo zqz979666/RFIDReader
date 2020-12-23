@@ -68,7 +68,6 @@ public class Tagyro {
         PDoA = new Double[tagNum][tagNum];
         PDoAMax = new Double[tagNum][tagNum];
         PDoAMin = new Double[tagNum][tagNum];
-        unwarp = new Double[tagNum][tagNum];
 
         initArrays();
 
@@ -135,24 +134,64 @@ public class Tagyro {
 
             //360°旋转 以2°为步长 总共180组数据
             for(int i = 0 ; i < 180 ; i++){
+                //记录上一次PDoA矩阵
+                Double[][] lastPDoA= new Double[tagNum][tagNum];
+                for(int i1 = 0 ; i1 < tagNum ; i1++){
+                    for(int j1 = 0 ; j1 < tagNum ; j1++){
+                        lastPDoA[i1][j1] = PDoA[i1][j1];
+                    }
+                }
+                //开始查询标签
                 reader.start();
                 System.out.println("Start inventory...");
-                Thread.sleep(1000);//等待1s 查询
+                Thread.sleep(3000);//等待3s 查询
                 reader.stop();
+
+                //unwarp
+                for(int i1 = 0 ; i1 < tagNum ; i1++){
+                    for(int j1 = 0 ; j1 < tagNum ; j1++){
+                        if(PDoA[i1][j1]-lastPDoA[i1][j1]>Math.PI && lastPDoA[i1][j1]!=0){
+                            unwarp[i1][j1] -= Math.PI;
+                        }
+                        if (PDoA[i1][j1]-lastPDoA[i1][j1]< -1 * Math.PI && lastPDoA[i1][j1]!=0){
+                            unwarp[i1][j1] += Math.PI;
+                        }
+                        PDoA[i1][j1] += unwarp[i1][j1];
+                        //update max and min of PDoA
+                        if(PDoA[i1][j1]>PDoAMax[i1][j1]){
+                            PDoAMax[i1][j1] = PDoA[i1][j1];
+                            PDoAMin[j1][i1] = PDoA[j1][i1];
+                        }
+                        if(PDoA[i1][j1]<PDoAMin[i1][j1]){
+                            PDoAMin[i1][j1] = PDoA[i1][j1];
+                            PDoAMax[j1][i1] = PDoA[j1][i1];
+                        }
+                    }
+                }
 
                 System.out.println("max PDoA: ");
                 for(int i1 = 0 ; i1 < tagNum ; i1++){
+                    System.out.print("[");
                     for(int j1 = 0 ; j1 < tagNum ; j1++){
-                        System.out.print(PDoAMax[i1][j1] + " ");
+                        System.out.print(PDoAMax[i1][j1] + ",");
                     }
-                    System.out.println("");
+                    System.out.println("]");
                 }
                 System.out.println("min PDoA: ");
                 for(int i1 = 0 ; i1 < tagNum ; i1++){
+                    System.out.print("[");
                     for(int j1 = 0 ; j1 < tagNum ; j1++){
-                        System.out.print(PDoAMin[i1][j1] + " ");
+                        System.out.print(PDoAMin[i1][j1] + ",");
                     }
-                    System.out.println("");
+                    System.out.println("]");
+                }
+                System.out.println("PDoA: ");
+                for(int i1 = 0 ; i1 < tagNum ; i1++){
+                    System.out.print("[");
+                    for(int j1 = 0 ; j1 < tagNum ; j1++){
+                        System.out.print(PDoA[i1][j1] + ",");
+                    }
+                    System.out.println("]");
                 }
                 System.out.println("effective distance: ");
                 for(int i1 = 0 ; i1 < tagNum ; i1++){
