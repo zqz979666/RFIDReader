@@ -96,6 +96,7 @@ public class TagReportListenerImplementation implements TagReportListener {
             // Epc Interval RSSI peakRSSI Phase TagSeenCount RfDopplerFrequency
             record = t.getEpc().toHexString() + "  "
                     + interval + " "
+                    + t.getAntennaPortNumber() + " "
                     + df.format(t.getChannelInMhz()) + " "
                     + df.format(t.getPeakRssiInDbm()) + " "
                     + df.format(t.getPhaseAngleInRadians()) + " "

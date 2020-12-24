@@ -17,8 +17,8 @@ public class ReaderInit {
 
     void InitReader() throws Exception {
         try {
-            String hostname = "169.254.1.6";
-            String propertyPath = hostname + ".xml";
+            String hostname = "169.254.1.4";
+            String propertyPath =hostname + ".xml";
 
             if(hostname == null) {
                 throw new Exception("Please specify the '"+ hostname + "' property");

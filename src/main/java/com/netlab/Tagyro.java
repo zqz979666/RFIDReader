@@ -27,7 +27,7 @@ import java.util.Scanner;
 public class Tagyro {
 
     public static String dataPath = "readData.txt";//存储数据路径
-    static String hostname = "169.254.1.6";//host
+    static String hostname = "169.254.1.4"; //host
     static Writer writer;//文件写入Writer
     public static String dateOfToday;//获取今日日期
     public static String timeNow;//获取现在的时间
@@ -68,6 +68,7 @@ public class Tagyro {
         PDoA = new Double[tagNum][tagNum];
         PDoAMax = new Double[tagNum][tagNum];
         PDoAMin = new Double[tagNum][tagNum];
+        unwarp = new Double[tagNum][tagNum];
 
         initArrays();
 
@@ -144,19 +145,18 @@ public class Tagyro {
                 //开始查询标签
                 reader.start();
                 System.out.println("Start inventory...");
-                Thread.sleep(3000);//等待3s 查询
+                Thread.sleep(4000);//等待3s 查询
                 reader.stop();
 
                 //unwarp
                 for(int i1 = 0 ; i1 < tagNum ; i1++){
                     for(int j1 = 0 ; j1 < tagNum ; j1++){
                         if(PDoA[i1][j1]-lastPDoA[i1][j1]>Math.PI && lastPDoA[i1][j1]!=0){
-                            unwarp[i1][j1] -= Math.PI;
+                            PDoA[i1][j1] -= Math.PI;
                         }
                         if (PDoA[i1][j1]-lastPDoA[i1][j1]< -1 * Math.PI && lastPDoA[i1][j1]!=0){
-                            unwarp[i1][j1] += Math.PI;
+                            PDoA[i1][j1] += Math.PI;
                         }
-                        PDoA[i1][j1] += unwarp[i1][j1];
                         //update max and min of PDoA
                         if(PDoA[i1][j1]>PDoAMax[i1][j1]){
                             PDoAMax[i1][j1] = PDoA[i1][j1];
@@ -168,40 +168,41 @@ public class Tagyro {
                         }
                     }
                 }
-
-                System.out.println("max PDoA: ");
+                System.out.println("group" + i);
+                writer.write("max PDoA: \n");
                 for(int i1 = 0 ; i1 < tagNum ; i1++){
-                    System.out.print("[");
+                    writer.write("[");
                     for(int j1 = 0 ; j1 < tagNum ; j1++){
-                        System.out.print(PDoAMax[i1][j1] + ",");
+                        writer.write(PDoAMax[i1][j1] + ",");
                     }
-                    System.out.println("]");
+                    writer.write("],\n");
                 }
-                System.out.println("min PDoA: ");
+                writer.write("min PDoA: \n");
                 for(int i1 = 0 ; i1 < tagNum ; i1++){
-                    System.out.print("[");
+                    writer.write("[");
                     for(int j1 = 0 ; j1 < tagNum ; j1++){
-                        System.out.print(PDoAMin[i1][j1] + ",");
+                        writer.write(PDoAMin[i1][j1] + ",");
                     }
-                    System.out.println("]");
+                    writer.write("],\n");
                 }
-                System.out.println("PDoA: ");
+                writer.write("PDoA: \n");
                 for(int i1 = 0 ; i1 < tagNum ; i1++){
-                    System.out.print("[");
+                    writer.write("[");
                     for(int j1 = 0 ; j1 < tagNum ; j1++){
-                        System.out.print(PDoA[i1][j1] + ",");
+                        writer.write(PDoA[i1][j1] + ",");
                     }
-                    System.out.println("]");
+                    writer.write("],\n");
                 }
-                System.out.println("effective distance: ");
+                writer.write("effective distance: \n");
                 for(int i1 = 0 ; i1 < tagNum ; i1++){
+                    writer.write("[");
                     for(int j1 = 0 ; j1 < tagNum ; j1++){
                         double ed = (PDoAMax[i1][j1]-PDoAMin[i1][j1])* waveLength / (8*Math.PI);
-                        System.out.print(PDoAMax[i1][j1] + " ");
+                        writer.write(PDoAMax[i1][j1] + ",");
                     }
-                    System.out.println("");
+                    writer.write("],\n");
                 }
-
+                writer.flush();
                 System.out.println("Press Enter to continue...");
                 Scanner s = new Scanner(System.in);
                 s.nextLine();

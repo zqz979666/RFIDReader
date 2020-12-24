@@ -8,6 +8,7 @@ package com.netlab;
 
 import com.impinj.octane.*;
 import com.netlab.listener.AntennaChangeListenerImplementation;
+import com.netlab.listener.ReaderStopListenerImplementation;
 import com.netlab.listener.TagOpCompleteListenerImplementation;
 import com.netlab.listener.TagReportListenerImplementation;
 
@@ -23,7 +24,7 @@ import java.util.HashMap;
 public class ReadTags {
 
     public static String dataPath = "readData.txt";//存储数据路径
-    static String hostname = "169.254.1.6";//host
+    static String hostname = "169.254.1.4";//host
     static Writer writer;//文件写入Writer
     public static String dateOfToday;//获取今日日期
     public static String timeNow;//获取现在的时间
@@ -107,6 +108,7 @@ public class ReadTags {
             //设置TagReportListener 当有TagReport时在其中处理
             reader.setTagReportListener(new TagReportListenerImplementation());
             reader.setAntennaChangeListener(new AntennaChangeListenerImplementation());
+            reader.setReaderStopListener(new ReaderStopListenerImplementation());
             System.out.println("set TagReportListener successfully!");
 
             writer.write("Read Time : " + dateOfToday + "\n");
@@ -116,6 +118,9 @@ public class ReadTags {
             Thread.sleep(18000);
 
 
+            for(String data : tagData){
+                writer.write(data + '\n');
+            }
             writer.write(antenna1Phase.toString());
             writer.write("\n");
             writer.write(antenna2Phase.toString());
