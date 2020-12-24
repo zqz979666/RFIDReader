@@ -29,6 +29,7 @@ public class Tagyro {
     public static String dataPath = "readData.txt";//存储数据路径
     static String hostname = "169.254.1.4"; //host
     static Writer writer;//文件写入Writer
+    static Writer PDoAWriter;//写入PDoA 画图用
     public static String dateOfToday;//获取今日日期
     public static String timeNow;//获取现在的时间
     public static ArrayList<String> tagData;//写入文件的已读取的标签信息
@@ -91,6 +92,7 @@ public class Tagyro {
                 }
             }
             writer = new FileWriter(dataFile);
+            PDoAWriter = new FileWriter(new File("Data/"+dateOfToday+"Data/"+"PDoA.txt"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -147,6 +149,10 @@ public class Tagyro {
                 System.out.println("Start inventory...");
                 Thread.sleep(3000);//等待3s 查询
                 reader.stop();
+
+                //记录PDoA[0][1]
+                //PDoAWriter.write(PDoA[0][1] + " ");
+                //PDoAWriter.flush();
 
                 //unwarp
                 for(int i1 = 0 ; i1 < tagNum ; i1++){
