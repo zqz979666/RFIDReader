@@ -145,7 +145,7 @@ public class Tagyro {
                 //开始查询标签
                 reader.start();
                 System.out.println("Start inventory...");
-                Thread.sleep(4000);//等待3s 查询
+                Thread.sleep(3000);//等待3s 查询
                 reader.stop();
 
                 //unwarp
@@ -157,7 +157,11 @@ public class Tagyro {
                         if (PDoA[i1][j1]-lastPDoA[i1][j1]< -1 * Math.PI && lastPDoA[i1][j1]!=0){
                             PDoA[i1][j1] += Math.PI;
                         }
-                        //update max and min of PDoA
+                    }
+                }
+                //update max and min of PDoA
+                for(int i1 = 0 ; i1 < tagNum ; i1++){
+                    for(int j1 = 0 ; j1 < tagNum ; j1++){
                         if(PDoA[i1][j1]>PDoAMax[i1][j1]){
                             PDoAMax[i1][j1] = PDoA[i1][j1];
                             PDoAMin[j1][i1] = PDoA[j1][i1];
@@ -193,21 +197,21 @@ public class Tagyro {
                     }
                     writer.write("],\n");
                 }
-                writer.write("effective distance: \n");
-                for(int i1 = 0 ; i1 < tagNum ; i1++){
-                    writer.write("[");
-                    for(int j1 = 0 ; j1 < tagNum ; j1++){
-                        double ed = (PDoAMax[i1][j1]-PDoAMin[i1][j1])* waveLength / (8*Math.PI);
-                        writer.write(PDoAMax[i1][j1] + ",");
-                    }
-                    writer.write("],\n");
-                }
                 writer.flush();
                 System.out.println("Press Enter to continue...");
                 Scanner s = new Scanner(System.in);
                 s.nextLine();
             }
-
+            //最后计算有效距离
+            writer.write("effective distance: \n");
+            for(int i1 = 0 ; i1 < tagNum ; i1++){
+                writer.write("[");
+                for(int j1 = 0 ; j1 < tagNum ; j1++){
+                    double ed = (PDoAMax[i1][j1]-PDoAMin[i1][j1])* waveLength / (8*Math.PI);
+                    writer.write(PDoAMax[i1][j1] + ",");
+                }
+                writer.write("],\n");
+            }
             System.out.println("Read Complete, ready to close connection...");
             reader.disconnect();
             System.out.println("Disconnected.");

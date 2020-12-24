@@ -74,15 +74,6 @@ public class TagReportListenerImplementationOfTagyro implements TagReportListene
 
                 if (t.isFastIdPresent()) {
                     System.out.print("\n     fast_id: " + t.getTid().toHexString());
-
-                    System.out.print(" model: " +
-                            t.getModelDetails().getModelName());
-
-                    System.out.print(" epcsize: " +
-                            t.getModelDetails().getEpcSizeBits());
-
-                    System.out.print(" usermemsize: " +
-                            t.getModelDetails().getUserMemorySizeBits());
                 }
                 System.out.println("");
             }
@@ -110,6 +101,7 @@ public class TagReportListenerImplementationOfTagyro implements TagReportListene
                 if(!Tagyro.phaseMap.containsKey(tagId)){
                     synchronized (this) {
                         Tagyro.indexMap.put(tagId,Tagyro.index++);
+                        System.out.println("ID: "+tagId+" index: " + (Tagyro.index-1));
                     }
                 }
                 Tagyro.phaseMap.put(tagId,t.getPhaseAngleInRadians());
